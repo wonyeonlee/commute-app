@@ -3,116 +3,87 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#123f78">
-<link rel="manifest" href="./manifest.json">
-<link rel="stylesheet" href="./style.css">
+<meta name="theme-color" content="#1f4e79">
+<link rel="manifest" href="manifest.json">
 <title>출퇴근 인증 알림</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><img src="./logo.png" alt="가축위생방역지원본부"></header>
+<header class="topbar">
+  <div class="brand"><img src="logo.png" onerror="this.style.display='none'"><div><b>출퇴근 인증</b><small>GPS 기반 근무지 인증</small></div></div>
+</header>
+
 <main>
-<section class="card clock-card">
-  <div id="today"></div><div id="clock"></div>
-</section>
-
-<section class="card">
-  <h2>📍 현재 위치</h2>
-  <strong id="locationStatus">위치 확인 전</strong>
-  <p>출퇴근 인증 시 GPS 위치를 확인합니다.</p>
-</section>
-
-<section class="card">
-  <h2>🏢 근무지</h2>
-  <strong id="workplaceName"></strong>
-  <p id="workplaceAddress">주소를 설정해주세요</p>
-  <small id="coordText"></small>
-</section>
-
-<section class="card">
-  <h2>오늘의 인증 현황</h2>
-  <div class="auth-grid">
-    <div class="auth-box">
-      <button id="checkInBtn" class="btn in">출근 인증</button>
-      <div><b>출근 상태</b><span id="inStatus" class="badge pending">미인증</span></div>
-      <div id="inTime">--:--</div>
+<section id="page-home" class="page active">
+  <div class="card hero">
+    <h2>출퇴근 인증</h2>
+    <p id="hello">직원 정보를 설정해 주세요.</p>
+    <div class="big-actions">
+      <button class="primary" id="btn-checkin">출근 인증</button>
+      <button class="secondary" id="btn-checkout">퇴근 인증</button>
     </div>
-    <div class="auth-box">
-      <button id="checkOutBtn" class="btn out">퇴근 인증</button>
-      <div><b>퇴근 상태</b><span id="outStatus" class="badge pending">미인증</span></div>
-      <div id="outTime">--:--</div>
+    <div id="gps-result" class="result"></div>
+  </div>
+  <div class="card">
+    <h3>오늘의 인증</h3>
+    <div class="today-grid">
+      <div><span>출근</span><strong id="today-in">미인증</strong></div>
+      <div><span>퇴근</span><strong id="today-out">미인증</strong></div>
     </div>
   </div>
+  <div class="card">
+    <h3>알림</h3>
+    <button class="outline" id="btn-notify">알림 권한 요청</button>
+    <button class="outline" id="btn-test-notify">알림 테스트</button>
+    <p id="next-alarm" class="muted">평일 08:50 출근 / 18:00 퇴근 알림</p>
+  </div>
 </section>
 
-<section class="card settings" id="settingsSection">
-  <h2>⚙️ 설정</h2>
-  <label>직원 이름<input id="employeeNameInput" type="text" placeholder="예: 홍길동"></label>
-  <label>직원 번호<input id="employeeIdInput" type="text" placeholder="예: CB-001"></label>
-  <label>근무지 이름<input id="nameInput" type="text"></label>
-  <label>근무지 주소<input id="addressInput" type="text" placeholder="실제 근무지 주소를 입력하세요"></label>
-  <button id="setWorkplaceBtn" class="sub-btn">📍 현재 위치를 근무지로 등록</button>
-  <small>현재 스마트폰이 근무지에 있을 때 한 번 등록하세요.</small>
-  <label>인증 반경
-    <select id="radiusInput">
-      <option value="50">50m</option><option value="100">100m</option>
-      <option value="200">200m</option><option value="300">300m</option><option value="500">500m</option>
-    </select>
-  </label>
-  <div class="row">
-    <label>출근 알림<input id="inAlarmInput" type="time" value="08:50"></label>
-    <label>퇴근 알림<input id="outAlarmInput" type="time" value="17:50"></label>
+<section id="page-history" class="page">
+  <div class="card">
+    <div class="section-head"><h2>인증 기록</h2><button class="small danger" id="btn-clear">전체 삭제</button></div>
+    <div id="history-list"></div>
+    <button class="outline full" id="btn-csv">CSV 다운로드</button>
   </div>
-  <button id="saveBtn" class="save-btn">설정 저장</button>
 </section>
 
-<section class="card">
-  <h2>🔔 스마트 알림</h2>
-  <div id="notificationStatus">확인 중...</div>
-  <p id="nextAlarm">다음 알림을 계산 중...</p>
-  <div class="row">
-    <button id="allowNotificationBtn" class="sub-btn">알림 권한 확인</button>
-    <button id="testNotificationBtn" class="sub-btn">알림 테스트</button>
+<section id="page-settings" class="page">
+  <div class="card">
+    <h2>설정</h2>
+    <label>직원명<input id="employee-name" placeholder="예: 홍길동"></label>
+    <label>직원번호<input id="employee-id" placeholder="예: 1234"></label>
+    <label>근무지명<input id="workplace-name" value="가축위생방역지원본부 충북도본부"></label>
+    <label>근무지 위도<input id="lat" type="number" step="any"></label>
+    <label>근무지 경도<input id="lng" type="number" step="any"></label>
+    <label>인증 반경(m)<input id="radius" type="number" min="10" value="100"></label>
+    <button class="primary full" id="btn-save">설정 저장</button>
+    <button class="outline full" id="btn-register-gps">현재 위치를 근무지로 등록</button>
+    <p id="settings-msg" class="muted"></p>
   </div>
-  <button id="scheduleBtn" class="save-btn">🔔 알림 예약 시작</button>
-  <small>
-    현재 버전은 앱이 열려 있거나 백그라운드에서 유지되는 동안 예약 알림을 동작시키는 방식입니다.
-    앱이 완전히 종료된 상태에서도 확실한 정시 알림을 보내려면 다음 단계에서 Web Push 서버를 연결합니다.
-  </small>
 </section>
 
-<section class="card" id="historySection">
-  <h2>📋 인증 기록</h2>
-  <p id="recordSummary">오늘 인증 기록을 이 기기에 저장합니다.</p>
-  <div class="history-tools">
-    <button id="exportCsvBtn" class="sub-btn">📥 CSV 다운로드</button>
-    <button id="clearHistoryBtn" class="sub-btn danger">전체 기록 삭제</button>
+<section id="page-admin" class="page">
+  <div class="card">
+    <h2>관리자 준비 화면</h2>
+    <p class="muted">현재 버전은 이 휴대폰에 저장된 기록을 기준으로 표시합니다.</p>
+    <div class="stats">
+      <div><span>기록 일수</span><strong id="stat-days">0</strong></div>
+      <div><span>출근</span><strong id="stat-in">0</strong></div>
+      <div><span>퇴근</span><strong id="stat-out">0</strong></div>
+    </div>
+    <p>※ 여러 직원의 기록을 중앙에서 관리하려면 다음 단계에서 서버 데이터베이스를 연결합니다.</p>
   </div>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>날짜</th><th>출근</th><th>퇴근</th><th>출근거리</th><th>퇴근거리</th></tr></thead>
-      <tbody id="historyBody"></tbody>
-    </table>
-  </div>
-  <small>인증 기록은 현재 이 스마트폰의 브라우저에 저장됩니다. 여러 직원의 자료를 하나의 관리자 화면에서 보려면 다음 단계에서 서버 저장을 연결합니다.</small>
-</section>
-
-<section class="card" id="adminSection">
-  <h2>🛠️ 관리자 준비 화면</h2>
-  <div class="stat-grid">
-    <div><b id="statDays">0</b><small>기록 일수</small></div>
-    <div><b id="statIn">0</b><small>출근 인증</small></div>
-    <div><b id="statOut">0</b><small>퇴근 인증</small></div>
-  </div>
-  <p>현재는 개인 기기에서 테스트하는 관리자 준비 단계입니다. 실제 운영에서는 직원별 계정과 서버를 연결해 관리자 전용 조회·엑셀 다운로드를 제공합니다.</p>
 </section>
 </main>
 
 <nav class="bottom-nav">
-  <button data-target="home">⌂<small>홈</small></button>
-  <button data-target="historySection">◷<small>인증 기록</small></button>
-  <button data-target="settingsSection">⚙<small>설정</small></button>
-  <button data-target="adminSection">ⓘ<small>관리</small></button>
+  <button data-page="home" class="nav-btn active"><span>⌂</span>홈</button>
+  <button data-page="history" class="nav-btn"><span>▤</span>인증기록</button>
+  <button data-page="settings" class="nav-btn"><span>⚙</span>설정</button>
+  <button data-page="admin" class="nav-btn"><span>☷</span>관리</button>
 </nav>
-<script src="./app.js"></script>
+
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
 </body>
 </html>
