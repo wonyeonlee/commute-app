@@ -9,7 +9,8 @@ const defaultSettings={
   lng:'',
   radius:100,
   checkinTime:'08:50',
-  checkoutTime:'18:00'
+  checkoutTime:'18:00',
+  alarmDays:[1,2,3,4,5]
 };
 
 function $(id){return document.getElementById(id)}
@@ -55,6 +56,7 @@ function fillSettings(){
   $('radius').value=s.radius||100;
   $('checkin-time').value=s.checkinTime||'08:50';
   $('checkout-time').value=s.checkoutTime||'18:00';
+  document.querySelectorAll('.day-check').forEach(c=>c.checked=(s.alarmDays||[1,2,3,4,5]).map(Number).includes(Number(c.value)));
 
   $('hello').textContent=s.employeeName
     ? `${s.employeeName}님, 오늘도 인증 누락을 확인해 주세요.`
@@ -75,7 +77,8 @@ function saveForm(){
     lng:$('lng').value,
     radius:Number($('radius').value)||100,
     checkinTime:$('checkin-time').value||'08:50',
-    checkoutTime:$('checkout-time').value||'18:00'
+    checkoutTime:$('checkout-time').value||'18:00',
+    alarmDays:Array.from(document.querySelectorAll('.day-check:checked')).map(c=>Number(c.value))
   };
   saveSettings(s);
   fillSettings();
@@ -180,9 +183,8 @@ function testNotify(){
 
 function scheduleCheck(){
   const now=new Date(),day=now.getDay();
-  if(day===0||day===6)return;
-
   const s=loadSettings();
+  if(!(s.alarmDays||[1,2,3,4,5]).map(Number).includes(day))return;
   const key='notified_'+localDate();
   const current=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
 
