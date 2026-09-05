@@ -40,6 +40,7 @@ function showPage(name){
   if(target) target.classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
   if(name==='history') renderHistory();
+  if(name==='auth'){renderToday();}
   if(name==='home') renderToday();
   window.scrollTo(0,0);
 }
@@ -149,10 +150,35 @@ function certify(type){
   },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 }
 
+function certifyTo(type, target){
+  const s=loadSettings();
+  if(!s.lat||!s.lng){toast('설정에서 먼저 근무지 위치를 등록해 주세요.');showPage('settings');return}
+  if(!navigator.geolocation){toast('GPS를 사용할 수 없습니다.');return}
+  const result=$(target==='auth'?'gps-result-auth':'gps-result');
+  if(result) result.textContent='현재 위치를 확인하는 중입니다…';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const distance=Math.round(haversine(Number(s.lat),Number(s.lng),pos.coords.latitude,pos.coords.longitude));
+    if(distance>Number(s.radius)){
+      if(result) result.textContent=`인증 확인 실패 · 근무지에서 ${distance}m · 허용 ${s.radius}m`;
+      return;
+    }
+    const date=localDate(),time=localTime(),h=loadHistory();
+    let row=h.find(x=>x.date===date);
+    if(!row){row={date,employeeName:s.employeeName,checkIn:'',checkOut:'',inDistance:'',outDistance:'',lat:'',lng:''};h.unshift(row);}
+    if(type==='in'){row.checkIn=time;row.inDistance=distance;} else {row.checkOut=time;row.outDistance=distance;}
+    row.lat=pos.coords.latitude.toFixed(7);row.lng=pos.coords.longitude.toFixed(7);
+    saveHistory(h.slice(0,500));
+    if(result) result.textContent=`${type==='in'?'출근':'퇴근'} 인증 완료 · 거리 ${distance}m · ${time}`;
+    renderToday();renderHistory();toast(`${type==='in'?'출근':'퇴근'} 인증이 완료되었습니다.`);
+  },()=>{if(result) result.textContent='GPS 확인 실패 · 위치 권한을 확인해 주세요.';},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+}
+
 function renderToday(){
   const date=localDate(),row=loadHistory().find(x=>x.date===date);
   $('today-in').textContent=row?.checkIn||'미확인';
   $('today-out').textContent=row?.checkOut||'미확인';
+  if($('auth-today-in')) $('auth-today-in').textContent=row?.checkIn||'미확인';
+  if($('auth-today-out')) $('auth-today-out').textContent=row?.checkOut||'미확인';
 }
 
 function renderHistory(){
@@ -244,6 +270,8 @@ function initApp(){
   // 주요 버튼
   $('btn-checkin')?.addEventListener('click',()=>certify('in'));
   $('btn-checkout')?.addEventListener('click',()=>certify('out'));
+  $('btn-checkin-auth')?.addEventListener('click',()=>certifyTo('in','auth'));
+  $('btn-checkout-auth')?.addEventListener('click',()=>certifyTo('out','auth'));
   $('btn-notify')?.addEventListener('click',notify);
   $('btn-test-notify')?.addEventListener('click',testNotify);
   $('btn-save')?.addEventListener('click',saveForm);
