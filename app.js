@@ -1,3 +1,93 @@
+
+// ===== 4단계: 스마트폰 알림 기능 =====
+function getLocalDateKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function isWeekday(d=new Date()) {
+  const n=d.getDay(); return n>=1 && n<=5;
+}
+async function requestNotificationPermission() {
+  if (!("Notification" in window)) {
+    alert("이 브라우저는 알림 기능을 지원하지 않습니다."); return false;
+  }
+  const p=await Notification.requestPermission();
+  updateNotificationStatus();
+  if(p==="granted") { alert("알림 권한이 허용되었습니다. '알림 테스트'를 눌러 확인해보세요."); return true; }
+  alert("알림 권한이 허용되지 않았습니다. Chrome의 사이트 알림 설정을 확인해주세요."); return false;
+}
+function updateNotificationStatus() {
+  const el=document.getElementById("notificationStatus"); if(!el) return;
+  if(!("Notification" in window)) { el.textContent="이 브라우저는 알림을 지원하지 않습니다."; return; }
+  el.textContent=Notification.permission==="granted" ? "✅ 알림 허용됨" :
+    Notification.permission==="denied" ? "⛔ 알림 차단됨" : "⚠️ 알림 권한 필요";
+}
+async function showTestNotification() {
+  if(!("Notification" in window)) { alert("이 브라우저는 알림을 지원하지 않습니다."); return; }
+  if(Notification.permission!=="granted" && !(await requestNotificationPermission())) return;
+  try {
+    const reg=await navigator.serviceWorker.ready;
+    await reg.showNotification("출퇴근 인증 알림",{
+      body:"알림 테스트입니다. 정상적으로 표시되면 성공입니다.",
+      icon:"./icon-192.png", badge:"./icon-192.png", tag:"commute-test",
+      data:{url:"./"}
+    });
+  } catch(e) {
+    try { new Notification("출퇴근 인증 알림",{body:"알림 테스트입니다."}); } catch(_) {}
+  }
+}
+let alarmTimer=null;
+function scheduleLocalAlarms() {
+  if(alarmTimer) clearTimeout(alarmTimer);
+  if(!("Notification" in window) || Notification.permission!=="granted") return;
+  const s=loadSettings(), now=new Date(), targets=[];
+  if(isWeekday(now)) {
+    for(const [kind,value,title] of [
+      ["arrival",s.arrivalAlert||"08:50","출근 인증을 해주세요."],
+      ["leave",s.leaveAlert||"17:50","퇴근 인증을 해주세요."]
+    ]) {
+      const [h,m]=String(value).split(":").map(Number), t=new Date(now);
+      t.setHours(h,m,0,0);
+      if(t>now) targets.push({time:t,title,kind});
+    }
+  }
+  if(!targets.length) {
+    const t=new Date(now); t.setDate(t.getDate()+1); t.setHours(0,0,2,0);
+    alarmTimer=setTimeout(scheduleLocalAlarms,Math.max(1000,t-now)); return;
+  }
+  targets.sort((a,b)=>a.time-b.time);
+  const next=targets[0];
+  alarmTimer=setTimeout(async()=>{
+    try {
+      const reg=await navigator.serviceWorker.ready;
+      await reg.showNotification("출퇴근 인증 알림",{
+        body:next.title, icon:"./icon-192.png", badge:"./icon-192.png",
+        tag:`commute-${next.kind}-${getLocalDateKey()}`, data:{url:"./"}
+      });
+    } catch(e) {}
+    scheduleLocalAlarms();
+  },Math.max(1000,next.time-now));
+}
+function getNextAlarmText() {
+  const s=loadSettings(), now=new Date();
+  if(!isWeekday(now)) return `다음 근무일 출근 알림: ${s.arrivalAlert||"08:50"}`;
+  const a=[];
+  for(const [label,value] of [["출근",s.arrivalAlert||"08:50"],["퇴근",s.leaveAlert||"17:50"]]) {
+    const [h,m]=String(value).split(":").map(Number), t=new Date(now); t.setHours(h,m,0,0);
+    if(t>now) a.push([t,label,value]);
+  }
+  if(!a.length) return `다음 근무일 출근 알림: ${s.arrivalAlert||"08:50"}`;
+  a.sort((x,y)=>x[0]-y[0]); return `다음 알림: ${a[0][1]} ${a[0][2]}`;
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  updateNotificationStatus();
+  const a=document.getElementById("allowNotificationBtn"), t=document.getElementById("testNotificationBtn");
+  if(a) a.addEventListener("click",requestNotificationPermission);
+  if(t) t.addEventListener("click",showTestNotification);
+  const n=document.getElementById("nextAlarm"); if(n) n.textContent=getNextAlarmText();
+  scheduleLocalAlarms();
+});
+
 const $=id=>document.getElementById(id);
 const KEY="attendanceAppV1";
 
