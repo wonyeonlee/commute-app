@@ -81,6 +81,11 @@
 
     <div class="day-settings">
       <label>알림 받을 요일</label>
+      <div class="quick-days">
+        <button type="button" class="day-quick" onclick="setAlarmDays([1,2,3,4,5])">평일</button>
+        <button type="button" class="day-quick" onclick="setAlarmDays([0,1,2,3,4,5,6])">매일</button>
+        <button type="button" class="day-quick" onclick="setAlarmDays([])">전체 해제</button>
+      </div>
       <div class="day-grid">
         <label><input type="checkbox" class="day-check" value="1"> 월</label>
         <label><input type="checkbox" class="day-check" value="2"> 화</label>
@@ -90,7 +95,8 @@
         <label><input type="checkbox" class="day-check" value="6"> 토</label>
         <label><input type="checkbox" class="day-check" value="0"> 일</label>
       </div>
-      <p class="muted">출근·퇴근 알림은 선택한 요일에만 작동합니다. 기본값은 월~금입니다.</p>
+      <p id="day-summary" class="muted">현재 선택: 월~금</p>
+      <p class="muted">토요일·일요일도 선택할 수 있습니다. 선택한 요일에는 출근·퇴근 알림이 작동합니다.</p>
     </div>
 
     <label>근무지명<input id="workplace-name" placeholder="예: 가축위생방역지원본부 충북도본부"></label>

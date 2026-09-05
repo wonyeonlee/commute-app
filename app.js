@@ -57,6 +57,7 @@ function fillSettings(){
   $('checkin-time').value=s.checkinTime||'08:50';
   $('checkout-time').value=s.checkoutTime||'18:00';
   document.querySelectorAll('.day-check').forEach(c=>c.checked=(s.alarmDays||[1,2,3,4,5]).map(Number).includes(Number(c.value)));
+  updateDaySummary();
 
   $('hello').textContent=s.employeeName
     ? `${s.employeeName}님, 오늘도 인증 누락을 확인해 주세요.`
@@ -68,6 +69,18 @@ function fillSettings(){
   $('home-address').textContent=s.workplaceAddress||'주소 미등록';
 }
 
+function setAlarmDays(days){
+  document.querySelectorAll('.day-check').forEach(c=>c.checked=days.includes(Number(c.value)));
+  updateDaySummary();
+}
+function updateDaySummary(){
+  const names=['일','월','화','수','목','금','토'];
+  const days=Array.from(document.querySelectorAll('.day-check:checked')).map(c=>Number(c.value));
+  days.sort((a,b)=>a-b);
+  const el=$('day-summary');
+  if(!el)return;
+  el.textContent='현재 선택: '+(days.length?days.map(d=>names[d]).join(' · '):'없음');
+}
 function saveForm(){
   const s={
     employeeName:$('employee-name').value.trim(),
@@ -182,38 +195,24 @@ function testNotify(){
 }
 
 function scheduleCheck(){
-  const now=new Date(),day=now.getDay();
+  const now=new Date(), day=now.getDay();
   const s=loadSettings();
   if(!(s.alarmDays||[1,2,3,4,5]).map(Number).includes(day))return;
-  const key='notified_'+localDate();
-  const current=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-
-  if(current===s.checkinTime&&localStorage.getItem(key+'_in')!=='1'&&Notification.permission==='granted'){
-    new Notification('출근 인증 알림',{body:'출근 인증을 해주세요. 기존 출퇴근 시스템에서 인증을 확인해 주세요.'});
-    localStorage.setItem(key+'_in','1');
-  }
-  if(current===s.checkoutTime&&localStorage.getItem(key+'_out')!=='1'&&Notification.permission==='granted'){
-    new Notification('퇴근 인증 알림',{body:'퇴근 인증을 해주세요. 기존 출퇴근 시스템에서 인증을 확인해 주세요.'});
-    localStorage.setItem(key+'_out','1');
-  }
+  if(!('Notification'in window)||Notification.permission!=='granted')return;
+  const current=now.getHours()*60+now.getMinutes();
+  const dateKey=now.toLocaleDateString('ko-KR');
+  const checkAlarm=(time,type,suffix)=>{
+    if(!time)return;
+    const [h,m]=time.split(':').map(Number), target=h*60+m;
+    // 앱이 정확히 그 순간 실행되지 않아도 같은 분 또는 직전 2분 내에는 1회 알림
+    if(current>=target && current<=target+2){
+      const key='alarm_'+dateKey+'_'+suffix;
+      if(localStorage.getItem(key)!=='1'){
+        localStorage.setItem(key,'1');
+        new Notification(type==='in'?'출근 인증 알림':'퇴근 인증 알림',{body:(type==='in'?'출근':'퇴근')+' 인증을 해주세요. 기존 출퇴근 시스템에서 인증을 확인해 주세요.'});
+      }
+    }
+  };
+  checkAlarm(s.checkinTime,'in','in');
+  checkAlarm(s.checkoutTime,'out','out');
 }
-
-document.addEventListener('DOMContentLoaded',()=>{
-  document.addEventListener('click',e=>{
-    const b=e.target.closest('.nav-btn');
-    if(b){e.preventDefault();showPage(b.dataset.page)}
-  });
-
-  $('btn-checkin').addEventListener('click',()=>certify('in'));
-  $('btn-checkout').addEventListener('click',()=>certify('out'));
-  $('btn-save').addEventListener('click',saveForm);
-  $('btn-register-gps').addEventListener('click',registerGPS);
-  $('btn-csv').addEventListener('click',csvDownload);
-  $('btn-clear').addEventListener('click',clearHistory);
-  $('btn-notify').addEventListener('click',notify);
-  $('btn-test-notify').addEventListener('click',testNotify);
-
-  fillSettings();renderToday();renderHistory();scheduleCheck();
-  setInterval(scheduleCheck,30000);
-  if('serviceWorker'in navigator) navigator.serviceWorker.register('service-worker.js').catch(()=>{});
-});

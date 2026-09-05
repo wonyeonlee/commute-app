@@ -17,3 +17,5 @@
 .day-grid label{background:#f1f4f7;border-radius:9px;padding:10px 4px;text-align:center;font-size:13px}
 .day-grid input{margin-right:3px}
 @media(max-width:480px){.day-grid{gap:4px}.day-grid label{padding:9px 2px;font-size:12px}}
+
+.quick-days{display:flex;gap:8px;margin:8px 0 10px}.quick-days button{flex:1;padding:10px;font-size:14px}.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.day-grid label{margin:0;text-align:center;padding:8px 2px;border:1px solid #ddd;border-radius:10px;font-weight:600;font-size:13px}.day-grid input{width:auto;margin-right:3px}
