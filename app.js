@@ -97,6 +97,7 @@ function saveForm(){
   fillSettings();
   toast('설정을 저장했습니다.');
   $('settings-msg').textContent='저장 완료';
+  updateNextAlarmText();
 }
 
 function registerGPS(){
@@ -188,10 +189,26 @@ async function notify(){
   toast(p==='granted'?'알림 권한이 허용되었습니다.':'알림 권한이 허용되지 않았습니다.');
 }
 
-function testNotify(){
-  if('Notification'in window&&Notification.permission==='granted'){
-    new Notification('출퇴근 누락방지 알림',{body:'알림 테스트입니다. 기존 출퇴근 시스템의 인증을 확인해 주세요.'});
-  }else toast('먼저 알림 권한을 요청해 주세요.');
+async function showAppNotification(title,body,tag){
+  if(!('Notification' in window) || Notification.permission!=='granted') return false;
+  const options={body,icon:'./icon-192.png',badge:'./icon-192.png',tag:tag||'commute-alarm'};
+  try{
+    if('serviceWorker' in navigator){
+      const reg=await navigator.serviceWorker.ready;
+      if(reg && reg.showNotification){await reg.showNotification(title,options);return true;}
+    }
+  }catch(e){}
+  try{new Notification(title,options);return true;}catch(e){return false;}
+}
+
+async function testNotify(){
+  if(!('Notification'in window)){toast('이 브라우저는 알림을 지원하지 않습니다.');return}
+  if(Notification.permission!=='granted'){
+    const p=await Notification.requestPermission();
+    if(p!=='granted'){toast('알림 권한을 허용해 주세요.');return}
+  }
+  const ok=await showAppNotification('출퇴근 누락방지 알림','알림 테스트입니다. 기존 출퇴근 시스템의 인증을 확인해 주세요.','commute-test');
+  toast(ok?'알림을 보냈습니다. 휴대폰 알림창을 확인해 주세요.':'알림 전송에 실패했습니다.');
 }
 
 function scheduleCheck(){
@@ -209,10 +226,69 @@ function scheduleCheck(){
       const key='alarm_'+dateKey+'_'+suffix;
       if(localStorage.getItem(key)!=='1'){
         localStorage.setItem(key,'1');
-        new Notification(type==='in'?'출근 인증 알림':'퇴근 인증 알림',{body:(type==='in'?'출근':'퇴근')+' 인증을 해주세요. 기존 출퇴근 시스템에서 인증을 확인해 주세요.'});
+        showAppNotification(type==='in'?'출근 인증 알림':'퇴근 인증 알림',(type==='in'?'출근':'퇴근')+' 인증을 해주세요. 기존 출퇴근 시스템에서 인증을 확인해 주세요.','commute-'+suffix);
       }
     }
   };
   checkAlarm(s.checkinTime,'in','in');
   checkAlarm(s.checkoutTime,'out','out');
 }
+// ===== 앱 초기화 =====
+function initApp(){
+  // 하단 메뉴: 모든 버튼을 명시적으로 연결해 설정 버튼이 확실히 작동하도록 합니다.
+  document.querySelectorAll('.nav-btn').forEach(btn=>{
+    btn.type='button';
+    btn.addEventListener('click',()=>showPage(btn.dataset.page));
+  });
+
+  // 주요 버튼
+  $('btn-checkin')?.addEventListener('click',()=>certify('in'));
+  $('btn-checkout')?.addEventListener('click',()=>certify('out'));
+  $('btn-notify')?.addEventListener('click',notify);
+  $('btn-test-notify')?.addEventListener('click',testNotify);
+  $('btn-save')?.addEventListener('click',saveForm);
+  $('btn-register-gps')?.addEventListener('click',registerGPS);
+  $('btn-clear')?.addEventListener('click',clearHistory);
+  $('btn-csv')?.addEventListener('click',csvDownload);
+
+  // 주말 포함 요일 빠른 선택 버튼
+  document.querySelectorAll('.day-quick').forEach(btn=>{
+    btn.type='button';
+    btn.addEventListener('click',()=>{
+      const action=btn.dataset.days;
+      if(action==='weekdays') setAlarmDays([1,2,3,4,5]);
+      if(action==='everyday') setAlarmDays([0,1,2,3,4,5,6]);
+      if(action==='none') setAlarmDays([]);
+    });
+  });
+
+  document.querySelectorAll('.day-check').forEach(c=>c.addEventListener('change',updateDaySummary));
+
+  fillSettings();
+  renderToday();
+  renderHistory();
+  updateNextAlarmText();
+  scheduleCheck();
+  setInterval(()=>{scheduleCheck();updateNextAlarmText()},30000);
+
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('service-worker.js')
+      .then(reg=>reg.update())
+      .catch(()=>{});
+  }
+}
+
+function updateNextAlarmText(){
+  const el=$('next-alarm');
+  if(!el)return;
+  const s=loadSettings();
+  const names=['일','월','화','수','목','금','토'];
+  const days=(s.alarmDays||[1,2,3,4,5]).map(Number);
+  const dayText=days.length?days.sort((a,b)=>a-b).map(d=>names[d]).join('·'):'없음';
+  el.textContent=days.length
+    ? `알림 요일: ${dayText}  |  출근 ${s.checkinTime} · 퇴근 ${s.checkoutTime}`
+    : '알림 받을 요일이 선택되지 않았습니다.';
+}
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initApp);
+else initApp();

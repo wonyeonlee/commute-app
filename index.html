@@ -27,8 +27,8 @@
     <h2>오늘의 출퇴근</h2>
     <p id="hello">설정에서 알림시간과 근무지를 등록해 주세요.</p>
     <div class="big-actions">
-      <button class="primary" id="btn-checkin">출근 확인</button>
-      <button class="secondary" id="btn-checkout">퇴근 확인</button>
+      <button type="button" class="primary" id="btn-checkin">출근 확인</button>
+      <button type="button" class="secondary" id="btn-checkout">퇴근 확인</button>
     </div>
     <div id="gps-result" class="result"></div>
   </div>
@@ -47,8 +47,8 @@
       <div><span>출근 알림</span><strong id="home-in-time">08:50</strong></div>
       <div><span>퇴근 알림</span><strong id="home-out-time">18:00</strong></div>
     </div>
-    <button class="outline full" id="btn-notify">알림 권한 요청</button>
-    <button class="outline full" id="btn-test-notify">알림 테스트</button>
+    <button type="button" class="outline full" id="btn-notify">알림 권한 요청</button>
+    <button type="button" class="outline full" id="btn-test-notify">알림 테스트</button>
     <p id="next-alarm" class="muted">설정한 평일 시간에 알림을 보냅니다.</p>
   </div>
 
@@ -61,9 +61,9 @@
 
 <section id="page-history" class="page">
   <div class="card">
-    <div class="section-head"><h2>내 인증 기록</h2><button class="small danger" id="btn-clear">전체 삭제</button></div>
+    <div class="section-head"><h2>내 인증 기록</h2><button type="button" class="small danger" id="btn-clear">전체 삭제</button></div>
     <div id="history-list"></div>
-    <button class="outline full" id="btn-csv">CSV 다운로드</button>
+    <button type="button" class="outline full" id="btn-csv">CSV 다운로드</button>
   </div>
 </section>
 
@@ -82,9 +82,9 @@
     <div class="day-settings">
       <label>알림 받을 요일</label>
       <div class="quick-days">
-        <button type="button" class="day-quick" onclick="setAlarmDays([1,2,3,4,5])">평일</button>
-        <button type="button" class="day-quick" onclick="setAlarmDays([0,1,2,3,4,5,6])">매일</button>
-        <button type="button" class="day-quick" onclick="setAlarmDays([])">전체 해제</button>
+        <button type="button" class="day-quick" data-days="weekdays">평일</button>
+        <button type="button" class="day-quick" data-days="everyday">매일</button>
+        <button type="button" class="day-quick" data-days="none">전체 해제</button>
       </div>
       <div class="day-grid">
         <label><input type="checkbox" class="day-check" value="1"> 월</label>
@@ -112,8 +112,8 @@
 
     <label>인증 반경(m)<input id="radius" type="number" min="10" max="1000" value="100"></label>
 
-    <button class="primary full" id="btn-save">설정 저장</button>
-    <button class="outline full" id="btn-register-gps">현재 위치를 근무지 위치로 등록</button>
+    <button type="button" class="primary full" id="btn-save">설정 저장</button>
+    <button type="button" class="outline full" id="btn-register-gps">현재 위치를 근무지 위치로 등록</button>
 
     <p class="muted">※ GPS는 인증할 때만 사용합니다. 주소는 개인정보 보호를 위해 외부 주소조회 서비스에 자동 전송하지 않고 직접 입력하도록 구성했습니다.</p>
     <p id="settings-msg" class="muted"></p>
