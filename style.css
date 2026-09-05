@@ -22,3 +22,5 @@
 
 
 @media(max-width:480px){.brand img{width:min(260px,78vw);max-height:48px}.brand b{font-size:16px}.brand small{font-size:11px}}
+
+.app-version{font-size:12px;opacity:.65;margin-left:4px}
