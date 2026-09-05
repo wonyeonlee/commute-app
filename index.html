@@ -5,43 +5,63 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1f4e79">
 <link rel="manifest" href="manifest.json">
-<title>출퇴근 인증 알림</title>
+<title>출퇴근 누락방지 알림</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="personal-notice">
+  <strong>개인용 출퇴근 누락방지 알림</strong><br>
+  기존 출퇴근 시스템을 대신하지 않고, 인증을 잊지 않도록 알려주는 보조 앱입니다.
+  기록은 이 휴대폰에만 저장됩니다.
+</div>
+
 <header class="topbar">
-  <div class="brand"><img src="logo.png" onerror="this.style.display='none'"><div><b>출퇴근 인증</b><small>GPS 기반 근무지 인증</small></div></div>
+  <div class="brand"><img src="logo.png" onerror="this.style.display='none'">
+    <div><b>출퇴근 누락방지</b><small>기존 시스템 인증을 잊지 않도록 알려드립니다</small></div>
+  </div>
 </header>
 
 <main>
 <section id="page-home" class="page active">
   <div class="card hero">
-    <h2>출퇴근 인증</h2>
-    <p id="hello">직원 정보를 설정해 주세요.</p>
+    <h2>오늘의 출퇴근</h2>
+    <p id="hello">설정에서 알림시간과 근무지를 등록해 주세요.</p>
     <div class="big-actions">
-      <button class="primary" id="btn-checkin">출근 인증</button>
-      <button class="secondary" id="btn-checkout">퇴근 인증</button>
+      <button class="primary" id="btn-checkin">출근 확인</button>
+      <button class="secondary" id="btn-checkout">퇴근 확인</button>
     </div>
     <div id="gps-result" class="result"></div>
   </div>
+
   <div class="card">
-    <h3>오늘의 인증</h3>
+    <h3>오늘의 인증 상태</h3>
     <div class="today-grid">
-      <div><span>출근</span><strong id="today-in">미인증</strong></div>
-      <div><span>퇴근</span><strong id="today-out">미인증</strong></div>
+      <div><span>출근</span><strong id="today-in">미확인</strong></div>
+      <div><span>퇴근</span><strong id="today-out">미확인</strong></div>
     </div>
   </div>
+
   <div class="card">
-    <h3>알림</h3>
-    <button class="outline" id="btn-notify">알림 권한 요청</button>
-    <button class="outline" id="btn-test-notify">알림 테스트</button>
-    <p id="next-alarm" class="muted">평일 08:50 출근 / 18:00 퇴근 알림</p>
+    <h3>알림 설정</h3>
+    <div class="time-summary">
+      <div><span>출근 알림</span><strong id="home-in-time">08:50</strong></div>
+      <div><span>퇴근 알림</span><strong id="home-out-time">18:00</strong></div>
+    </div>
+    <button class="outline full" id="btn-notify">알림 권한 요청</button>
+    <button class="outline full" id="btn-test-notify">알림 테스트</button>
+    <p id="next-alarm" class="muted">설정한 평일 시간에 알림을 보냅니다.</p>
+  </div>
+
+  <div class="card">
+    <h3>등록된 근무지</h3>
+    <p id="home-workplace" class="workplace-info">설정 필요</p>
+    <p id="home-address" class="muted"></p>
   </div>
 </section>
 
 <section id="page-history" class="page">
   <div class="card">
-    <div class="section-head"><h2>인증 기록</h2><button class="small danger" id="btn-clear">전체 삭제</button></div>
+    <div class="section-head"><h2>내 인증 기록</h2><button class="small danger" id="btn-clear">전체 삭제</button></div>
     <div id="history-list"></div>
     <button class="outline full" id="btn-csv">CSV 다운로드</button>
   </div>
@@ -49,37 +69,34 @@
 
 <section id="page-settings" class="page">
   <div class="card">
-    <h2>설정</h2>
-    <label>직원명<input id="employee-name" placeholder="예: 홍길동"></label>
-    <label>직원번호<input id="employee-id" placeholder="예: 1234"></label>
-    <label>근무지명<input id="workplace-name" value="가축위생방역지원본부 충북도본부"></label>
-    <label>근무지 위도<input id="lat" type="number" step="any"></label>
-    <label>근무지 경도<input id="lng" type="number" step="any"></label>
-    <label>인증 반경(m)<input id="radius" type="number" min="10" value="100"></label>
-    <button class="primary full" id="btn-save">설정 저장</button>
-    <button class="outline full" id="btn-register-gps">현재 위치를 근무지로 등록</button>
-    <p id="settings-msg" class="muted"></p>
-  </div>
-</section>
+    <h2>개인 설정</h2>
+    <p class="muted">근무시간은 고정값이 아닙니다. 근무일정에 맞게 언제든 변경할 수 있습니다.</p>
 
-<section id="page-admin" class="page">
-  <div class="card">
-    <h2>관리자 대시보드</h2>
-    <p class="muted">8단계: 중앙관리 연결을 위한 관리자 화면입니다. 현재는 이 기기의 저장 기록을 보여줍니다.</p>
-    <div class="stats">
-      <div><span>기록 일수</span><strong id="stat-days">0</strong></div>
-      <div><span>출근</span><strong id="stat-in">0</strong></div>
-      <div><span>퇴근</span><strong id="stat-out">0</strong></div>
+    <label>이름(선택)<input id="employee-name" placeholder="예: 홍길동"></label>
+
+    <div class="two-col">
+      <label>출근 알림 시간<input id="checkin-time" type="time" value="08:50"></label>
+      <label>퇴근 알림 시간<input id="checkout-time" type="time" value="18:00"></label>
     </div>
-  </div>
-  <div class="card">
-    <h3>직원별 현황</h3>
-    <div id="employee-summary"></div>
-  </div>
-  <div class="card">
-    <h3>중앙관리 준비</h3>
-    <p>다음 단계에서 Firebase 또는 Supabase 데이터베이스를 연결하면 여러 직원의 기록을 관리자 PC에서 한곳에 모을 수 있습니다.</p>
-    <button class="outline full" id="btn-csv-admin">전체 기록 CSV 내보내기</button>
+
+    <label>근무지명<input id="workplace-name" placeholder="예: 가축위생방역지원본부 충북도본부"></label>
+    <label>근무지 주소<input id="workplace-address" placeholder="예: 충북 청주시 ○○구 ○○로 00"></label>
+
+    <div class="location-box">
+      <div><span>위도</span><strong id="lat-view">미등록</strong></div>
+      <div><span>경도</span><strong id="lng-view">미등록</strong></div>
+    </div>
+
+    <input id="lat" type="hidden">
+    <input id="lng" type="hidden">
+
+    <label>인증 반경(m)<input id="radius" type="number" min="10" max="1000" value="100"></label>
+
+    <button class="primary full" id="btn-save">설정 저장</button>
+    <button class="outline full" id="btn-register-gps">현재 위치를 근무지 위치로 등록</button>
+
+    <p class="muted">※ GPS는 인증할 때만 사용합니다. 주소는 개인정보 보호를 위해 외부 주소조회 서비스에 자동 전송하지 않고 직접 입력하도록 구성했습니다.</p>
+    <p id="settings-msg" class="muted"></p>
   </div>
 </section>
 </main>
@@ -88,7 +105,6 @@
   <button data-page="home" class="nav-btn active"><span>⌂</span>홈</button>
   <button data-page="history" class="nav-btn"><span>▤</span>인증기록</button>
   <button data-page="settings" class="nav-btn"><span>⚙</span>설정</button>
-  <button data-page="admin" class="nav-btn"><span>☷</span>관리</button>
 </nav>
 
 <div id="toast" class="toast"></div>
