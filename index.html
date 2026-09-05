@@ -64,14 +64,22 @@
 
 <section id="page-admin" class="page">
   <div class="card">
-    <h2>관리자 준비 화면</h2>
-    <p class="muted">현재 버전은 이 휴대폰에 저장된 기록을 기준으로 표시합니다.</p>
+    <h2>관리자 대시보드</h2>
+    <p class="muted">8단계: 중앙관리 연결을 위한 관리자 화면입니다. 현재는 이 기기의 저장 기록을 보여줍니다.</p>
     <div class="stats">
       <div><span>기록 일수</span><strong id="stat-days">0</strong></div>
       <div><span>출근</span><strong id="stat-in">0</strong></div>
       <div><span>퇴근</span><strong id="stat-out">0</strong></div>
     </div>
-    <p>※ 여러 직원의 기록을 중앙에서 관리하려면 다음 단계에서 서버 데이터베이스를 연결합니다.</p>
+  </div>
+  <div class="card">
+    <h3>직원별 현황</h3>
+    <div id="employee-summary"></div>
+  </div>
+  <div class="card">
+    <h3>중앙관리 준비</h3>
+    <p>다음 단계에서 Firebase 또는 Supabase 데이터베이스를 연결하면 여러 직원의 기록을 관리자 PC에서 한곳에 모을 수 있습니다.</p>
+    <button class="outline full" id="btn-csv-admin">전체 기록 CSV 내보내기</button>
   </div>
 </section>
 </main>

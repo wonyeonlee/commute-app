@@ -73,7 +73,16 @@ function renderHistory(){
  list.innerHTML=h.slice(0,20).map(r=>`<div class="record"><b>${r.date} · ${r.employeeName||'-'} (${r.employeeId||'-'})</b><div>출근: ${r.checkIn||'미인증'} ${r.inDistance!==''?`· ${r.inDistance}m`:''}</div><div>퇴근: ${r.checkOut||'미인증'} ${r.outDistance!==''?`· ${r.outDistance}m`:''}</div></div>`).join('');
 }
 function renderStats(){
- const h=loadHistory();$('stat-days').textContent=new Set(h.map(x=>x.date)).size;$('stat-in').textContent=h.filter(x=>x.checkIn).length;$('stat-out').textContent=h.filter(x=>x.checkOut).length;
+ const h=loadHistory();
+ $('stat-days').textContent=new Set(h.map(x=>x.date)).size;
+ $('stat-in').textContent=h.filter(x=>x.checkIn).length;
+ $('stat-out').textContent=h.filter(x=>x.checkOut).length;
+ const by={};
+ h.forEach(r=>{const k=r.employeeId||'미등록';if(!by[k])by[k]={name:r.employeeName||'-',id:k,days:0,ins:0,outs:0};by[k].days++;if(r.checkIn)by[k].ins++;if(r.checkOut)by[k].outs++;});
+ const rows=Object.values(by);
+ const box=$('employee-summary'); if(box) box.innerHTML=rows.length
+ ? '<div class="admin-table">'+rows.map(r=>`<div class="admin-row"><b>${r.name}</b><span>${r.id}</span><span>기록 ${r.days}일</span><span>출근 ${r.ins}</span><span>퇴근 ${r.outs}</span></div>`).join('')+'</div>'
+ : '<p class="muted">아직 기록이 없습니다.</p>';
 }
 function csvDownload(){
  const h=loadHistory();if(!h.length){toast('다운로드할 기록이 없습니다.');return}
@@ -106,6 +115,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('btn-save').addEventListener('click',saveForm);
   $('btn-register-gps').addEventListener('click',registerGPS);
   $('btn-csv').addEventListener('click',csvDownload);
+  $('btn-csv-admin').addEventListener('click',csvDownload);
   $('btn-clear').addEventListener('click',clearHistory);
   $('btn-notify').addEventListener('click',notify);
   $('btn-test-notify').addEventListener('click',testNotify);
