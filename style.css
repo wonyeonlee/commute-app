@@ -1,0 +1,36 @@
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6fa;color:#172033;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR","Malgun Gothic",sans-serif}
+.header{background:#123b75;padding:14px 18px;text-align:center;box-shadow:0 2px 8px #0002}
+.header img{width:min(92%,460px);max-height:78px;object-fit:contain}
+main{max-width:760px;margin:auto;padding:14px 14px 95px}
+.card{background:#fff;border-radius:18px;margin:12px 0;padding:20px;box-shadow:0 3px 14px #193b6b18}
+.date-card{text-align:center}
+.date{font-size:20px;font-weight:700;color:#123b75}
+.clock{font-size:44px;font-weight:800;letter-spacing:2px;margin-top:6px}
+.label,.section-title{font-size:20px;font-weight:800;color:#123b75;margin-bottom:10px}
+.workplace{font-size:20px;font-weight:800}
+.address{margin-top:7px;color:#667085;line-height:1.5}
+.auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.auth-box{background:#f8fafc;border-radius:16px;padding:12px}
+.btn{width:100%;border:0;border-radius:14px;color:#fff;font-size:22px;font-weight:800;padding:23px 8px;cursor:pointer}
+.work{background:#19b86b}.leave{background:#2867d7}
+.status-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-weight:700}
+.badge{padding:5px 11px;border-radius:999px;color:#fff;background:#ef4444;font-size:14px}
+.badge.done{background:#16a34a}
+.auth-time{text-align:center;font-size:23px;font-weight:800;margin-top:8px}
+.alarm-line{display:flex;justify-content:space-between;padding:7px 0;font-size:17px}
+.alarm-line strong{font-size:23px;color:#2867d7}
+.settings label{display:block;font-weight:700;margin:12px 0}
+input{width:100%;margin-top:6px;padding:13px;border:1px solid #d0d5dd;border-radius:10px;font-size:16px;background:#fff}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.save{width:100%;border:0;border-radius:12px;padding:14px;background:#123b75;color:#fff;font-size:18px;font-weight:800;margin-top:8px}
+.hint{font-size:13px;color:#667085;line-height:1.5}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;display:flex;justify-content:center;gap:10px;padding:9px 4px calc(9px + env(safe-area-inset-bottom));z-index:10}
+.nav-item{width:25%;max-width:150px;text-align:center;font-size:22px;color:#667085}
+.nav-item span{display:block;font-size:12px;margin-top:2px}
+.nav-item.active{color:#123b75;font-weight:800}
+@media(max-width:430px){.clock{font-size:36px}.auth-grid{gap:8px}.btn{font-size:19px;padding:21px 4px}.workplace{font-size:18px}.card{padding:16px}}
+
+.gps-setting{margin:14px 0;padding:14px;border:1px dashed #b8c2d1;border-radius:12px;background:#f8fafc;font-size:14px;line-height:1.5}
+.gps-btn{width:100%;margin-top:10px;border:0;border-radius:10px;padding:12px;background:#e9eef7;color:#123b75;font-size:15px;font-weight:800}
+select{width:100%;margin-top:6px;padding:13px;border:1px solid #d0d5dd;border-radius:10px;font-size:16px;background:#fff}

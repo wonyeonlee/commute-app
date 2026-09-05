@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#123b75">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <title>출퇴근 인증 알림</title>
+</head>
+<body>
+<header class="header">
+  <img src="logo.png" alt="가축위생방역지원본부 로고">
+</header>
+
+<main>
+  <section class="card date-card">
+    <div class="date" id="today"></div>
+    <div class="clock" id="clock">--:--:--</div>
+  </section>
+
+  <section class="card">
+    <div class="label">📍 현재 위치</div>
+    <div class="workplace" id="locationStatus">위치 확인 전</div>
+    <div class="address" id="distanceText">출퇴근 인증 시 GPS 위치를 확인합니다.</div>
+  </section>
+
+  <section class="card">
+    <div class="label">🏢 근무지</div>
+    <div class="workplace" id="workplaceName">가축위생방역지원본부 충북도본부</div>
+    <div class="address" id="workplaceAddress">주소를 설정해주세요</div>
+  </section>
+
+  <section class="card">
+    <div class="section-title">오늘의 인증 현황</div>
+    <div class="auth-grid">
+      <div class="auth-box">
+        <button class="btn work" id="checkInBtn">출근 인증</button>
+        <div class="status-row">출근 상태 <span id="inStatus" class="badge pending">미인증</span></div>
+        <div class="auth-time" id="inTime">--:--</div>
+      </div>
+      <div class="auth-box">
+        <button class="btn leave" id="checkOutBtn">퇴근 인증</button>
+        <div class="status-row">퇴근 상태 <span id="outStatus" class="badge pending">미인증</span></div>
+        <div class="auth-time" id="outTime">--:--</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card next-card">
+    <div class="section-title">🔔 다음 알림</div>
+    <div class="alarm-line"><span>출근 인증 알림</span><strong id="inAlarm">08:50</strong></div>
+    <div class="alarm-line"><span>퇴근 인증 알림</span><strong id="outAlarm">17:50</strong></div>
+  </section>
+
+  <section class="card settings">
+    <div class="section-title">⚙️ 설정</div>
+    <label>근무지 이름
+      <input id="nameInput" value="가축위생방역지원본부 충북도본부">
+    </label>
+    <label>근무지 주소
+      <input id="addressInput" placeholder="실제 근무지 주소를 입력하세요">
+    </label>
+    <div class="gps-setting">
+      <div><strong>근무지 GPS 좌표</strong><br><span id="coordText">아직 등록되지 않았습니다.</span></div>
+      <button class="gps-btn" id="setWorkplaceBtn">현재 위치를 근무지로 등록</button>
+    </div>
+    <label>인증 반경
+      <select id="radiusInput">
+        <option value="50">50m</option>
+        <option value="100" selected>100m</option>
+        <option value="200">200m</option>
+        <option value="300">300m</option>
+        <option value="500">500m</option>
+      </select>
+    </label>
+    <div class="two">
+      <label>출근 알림
+        <input id="inAlarmInput" type="time" value="08:50">
+      </label>
+      <label>퇴근 알림
+        <input id="outAlarmInput" type="time" value="17:50">
+      </label>
+    </div>
+    <button class="save" id="saveBtn">설정 저장</button>
+    <p class="hint">주소와 알림시간은 언제든지 이 화면에서 변경할 수 있습니다. 다음 단계에서 GPS 근무지 인증 기능을 연결할 수 있습니다.</p>
+  </section>
+</main>
+
+<nav class="nav">
+  <div class="nav-item active">⌂<span>홈</span></div>
+  <div class="nav-item">◷<span>인증 기록</span></div>
+  <div class="nav-item">⚙<span>설정</span></div>
+  <div class="nav-item">ⓘ<span>앱 정보</span></div>
+</nav>
+
+<script src="app.js"></script>
+</body>
+</html>
