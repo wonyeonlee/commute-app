@@ -1,4 +1,5 @@
-const CACHE='commute-stable-1';const ASSETS=['./','./index.html','./app.js','./style.css','./manifest.json','./logo.png','./icon-192.png','./icon-512.png'];
+const CACHE='commute-stable-2';const ASSETS=['./','./index.html','./app.js','./style.css','./manifest.json','./logo.png','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(fetch(e.request).then(r=>{const c=r.clone();caches.open(CACHE).then(x=>x.put(e.request,c));return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match('./index.html'))))});
+self.addEventListener('message',e=>{if(e.data&&e.data.type==='TEST_NOTIFICATION')self.registration.showNotification('🔔 출퇴근 알림 테스트',{body:'알림이 정상적으로 표시됩니다.',tag:'attendance-test',renotify:true});});

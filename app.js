@@ -18,6 +18,31 @@ async function notifyPermission(){if(!('Notification'in window))return toast('�
 async function testNotify(){if(!('Notification'in window))return toast('웹 알림을 지원하지 않습니다.');if(Notification.permission!=='granted'){const p=await Notification.requestPermission();if(p!=='granted')return toast('알림 권한을 먼저 허용해 주세요.')}try{const reg=await navigator.serviceWorker.ready;await reg.showNotification('🔔 출퇴근 알림 테스트',{body:'알림이 정상적으로 표시되는지 확인해 주세요.',tag:'attendance-test'});toast('알림을 보냈습니다.')}catch(e){try{new Notification('🔔 출퇴근 알림 테스트',{body:'알림 테스트입니다.'});toast('알림을 보냈습니다.')}catch{toast('알림 전송에 실패했습니다.')}}}
 function updateNotifyStatus(){const p='Notification'in window?Notification.permission:'지원 안 함';$('notify-status').textContent=`알림 권한: ${p}`}
 function updateNext(){const s=settings(),d=new Date(),wd=d.getDay(),ok=(s.days||[]).map(Number).includes(wd);$('next-alarm').textContent=ok?`오늘 알림: 출근 ${s.workTime} / 퇴근 ${s.offTime}`:`오늘은 알림 요일이 아닙니다. (설정한 요일 기준)`}
-function schedule(){const s=settings(),d=new Date(),wd=d.getDay();if(!(s.days||[]).map(Number).includes(wd)||!('Notification'in window)||Notification.permission!=='granted')return;const k=date();const hm=d.getHours()*60+d.getMinutes();for(const [type,t] of [['in',s.workTime],['out',s.offTime]]){if(hm===min(t)&&d.getSeconds()<40&&localStorage.getItem(`sent_${k}_${type}`)!=='1'){new Notification(type==='in'?'⏰ 출근 인증 알림':'🏠 퇴근 인증 알림',{body:type==='in'?'출근 인증을 해주세요.':'퇴근 인증을 해주세요.',tag:`attendance-${k}-${type}`});localStorage.setItem(`sent_${k}_${type}`,'1')}}}
+async function sendScheduledNotification(type,k){
+  const title=type==='in'?'⏰ 출근 인증 알림':'🏠 퇴근 인증 알림';
+  const body=type==='in'?'출근 인증을 해주세요.':'퇴근 인증을 해주세요.';
+  try{
+    if('serviceWorker' in navigator){
+      const reg=await navigator.serviceWorker.ready;
+      await reg.showNotification(title,{body,tag:`attendance-${k}-${type}`,renotify:true});
+      return true;
+    }
+  }catch(e){}
+  try{new Notification(title,{body,tag:`attendance-${k}-${type}`});return true}catch(e){return false}
+}
+function schedule(){
+  const s=settings(),d=new Date(),wd=d.getDay();
+  if(!(s.days||[]).map(Number).includes(wd)||!('Notification'in window)||Notification.permission!=='granted')return;
+  const k=date(), nowMin=d.getHours()*60+d.getMinutes()+d.getSeconds()/60;
+  for(const [type,t] of [['in',s.workTime],['out',s.offTime]]){
+    const target=min(t);
+    // 예약시각을 조금 지나 앱이 깨어난 경우도 놓치지 않도록 2분 동안 인정
+    if(nowMin>=target && nowMin<target+2 && localStorage.getItem(`sent_${k}_${type}`)!=='1'){
+      localStorage.setItem(`sent_${k}_${type}`,'1');
+      sendScheduledNotification(type,k);
+    }
+  }
+}
+
 function init(){document.addEventListener('click',e=>{const b=e.target.closest('.nav-btn');if(b)showPage(b.dataset.page)});$('btn-checkin').onclick=()=>certify('in');$('btn-checkout').onclick=()=>certify('out');$('btn-checkin-2').onclick=()=>certify('in');$('btn-checkout-2').onclick=()=>certify('out');$('btn-save').onclick=saveForm;$('btn-register-gps').onclick=registerGPS;$('btn-csv').onclick=csv;$('btn-clear').onclick=()=>{if(confirm('모든 인증 기록을 삭제할까요?')){localStorage.removeItem(HIST);renderHistory();renderToday();toast('기록을 삭제했습니다.')}};$('btn-notify').onclick=notifyPermission;$('btn-test-notify').onclick=testNotify;$('days-week').onclick=()=>setDays([1,2,3,4,5]);$('days-all').onclick=()=>setDays([0,1,2,3,4,5,6]);$('days-none').onclick=()=>setDays([]);fill();renderToday();renderHistory();schedule();setInterval(schedule,15000);if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js?v=stable1',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});}
 document.addEventListener('DOMContentLoaded',init);
